@@ -2,8 +2,8 @@ package io.codelex.synonymsapp.synonyms;
 
 import io.codelex.synonymsapp.synonyms.dto.Definition;
 import io.codelex.synonymsapp.synonyms.dto.Meaning;
-import io.codelex.synonymsapp.synonyms.dto.NotFoundError;
 import io.codelex.synonymsapp.synonyms.dto.Word;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -18,7 +18,7 @@ public class SynonymsService {
     public Set<String> getAllSynonyms(String word) {
         WebClient webClient = WebClient.create();
         String resourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word;
-        Word[] fullWordInfo = null;
+        Word[] fullWordInfo;
         try {
             fullWordInfo = webClient.get()
                     .uri(resourceUrl)
@@ -26,10 +26,9 @@ public class SynonymsService {
                     .bodyToMono(Word[].class)
                     .block();
         } catch (WebClientResponseException e) {
-            NotFoundError err = e.getResponseBodyAs(NotFoundError.class);
-            if (err != null) {
-                return Collections.singleton(err.getTitle());
-            }
+            String responseBody = e.getResponseBodyAsString();
+            String err = StringUtils.substringBetween(responseBody, ":\"", "\"");
+            return Collections.singleton(err);
         }
         if (fullWordInfo == null) {
             return new HashSet<>();

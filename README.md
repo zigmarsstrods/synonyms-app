@@ -2,7 +2,8 @@
 
 ## Description
 
-REST API using JAVA, Spring Boot and Maven that allows to enter an English word in URL path and receive all synonyms of the word as response. Synonym data is taken from [Dictionary API](https://dictionaryapi.dev/)
+REST API using JAVA, Spring Boot and Maven that allows to enter an English word in URL path and receive all synonyms of
+the word as response. Synonym data is taken from [Dictionary API](https://dictionaryapi.dev/)
 
 ## Setup
 
@@ -16,15 +17,8 @@ Just clone this repository
 
 ### Endpoints
 
-Available from localhost on port 8080: [http://localhost:8080/](http://localhost:8080/)
-
-#### `GET /synonyms/{word}`
-
-Enter the necessary word to get its synonyms as a list in the response page 
-
-##### Example
-
-![Example](example.png)
+After running endpoint description is available in [Swagger](http://localhost:8080/swagger-ui/index.html)
+![Swagger](swagger.png)
 
 ## Tests
 
