@@ -51,7 +51,8 @@ public class SynonymsService {
                 .map(Definition::getSynonyms)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        return Stream.concat(outerSynonyms.stream(), innerSynonyms.stream())
+        return Stream.of(outerSynonyms, innerSynonyms)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
 }
