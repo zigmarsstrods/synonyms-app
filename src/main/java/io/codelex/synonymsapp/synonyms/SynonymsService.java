@@ -1,57 +1,43 @@
 package io.codelex.synonymsapp.synonyms;
 
-import io.codelex.synonymsapp.synonyms.dto.Definition;
-import io.codelex.synonymsapp.synonyms.dto.Meaning;
 import io.codelex.synonymsapp.synonyms.dto.Word;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class SynonymsService {
 
+    @Value("${synonyms.external-api-url}")
+    private String externalApiUrl;
+
     public Set<String> getAllSynonyms(String word) {
-        WebClient webClient = WebClient.create();
-        String resourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word;
-        Word[] fullWordInfo;
         try {
-            fullWordInfo = webClient.get()
-                    .uri(resourceUrl)
-                    .retrieve()
-                    .bodyToMono(Word[].class)
-                    .block();
-        } catch (WebClientResponseException e) {
-            String responseBody = e.getResponseBodyAsString();
-            String err = StringUtils.substringBetween(responseBody, ":\"", "\"");
-            return Collections.singleton(err);
-        }
-        if (fullWordInfo == null) {
-            return new HashSet<>();
-        } else {
+            Word[] fullWordInfoArray = getDataFromExternalApi(word);
+            Word fullWordInfo = fullWordInfoArray[0];
             return getSynonymsFromWord(fullWordInfo);
+        } catch (WebClientResponseException e) {
+            return Set.of("Word not found");
         }
     }
 
-    private Set<String> getSynonymsFromWord(Word[] word) {
-        Set<String> outerSynonyms = word[0].getMeanings()
-                .stream()
-                .map(Meaning::getSynonyms)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        Set<String> innerSynonyms = word[0].getMeanings()
-                .stream()
-                .map(Meaning::getDefinitions)
-                .flatMap(Collection::stream)
-                .map(Definition::getSynonyms)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        return Stream.of(outerSynonyms, innerSynonyms)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+    public Word[] getDataFromExternalApi(String word) {
+        return WebClient.create(externalApiUrl + word)
+                .get()
+                .retrieve()
+                .bodyToMono(Word[].class)
+                .block();
+    }
+
+    private Set<String> getSynonymsFromWord(Word fullWordInfo) {
+        Set<String> synonyms = new HashSet<>();
+        fullWordInfo.getMeanings()
+                .forEach(m -> synonyms.addAll(m.getSynonyms()));
+        fullWordInfo.getMeanings()
+                .forEach(m -> m.getDefinitions().forEach(d -> synonyms.addAll(d.getSynonyms())));
+        return synonyms;
     }
 }
