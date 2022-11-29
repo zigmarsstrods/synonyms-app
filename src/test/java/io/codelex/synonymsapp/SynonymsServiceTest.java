@@ -19,7 +19,7 @@ import java.util.Set;
 public class SynonymsServiceTest {
 
     @Spy
-    private final SynonymsService synonymsService = new SynonymsService();
+    SynonymsService synonymsService;
 
     @Test
     public void allSynonymsShouldBeReturned() {
