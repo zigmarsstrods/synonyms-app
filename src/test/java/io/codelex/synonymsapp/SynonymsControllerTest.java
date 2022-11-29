@@ -10,13 +10,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 public class SynonymsControllerTest {
-
-    private final Set<String> expected = new HashSet<>();
 
     @Mock
     SynonymsService synonymsService;
@@ -26,19 +23,12 @@ public class SynonymsControllerTest {
 
     @Test
     public void allSynonymsShouldBeReturned() {
-        setupStringSet();
+        Set<String> expected = Set.of("lay", "put");
         Mockito.doAnswer(invocation -> expected)
                 .when(synonymsService)
                 .getAllSynonyms(Mockito.any(String.class));
         String name = "set";
         Set<String> result = synonymsController.getAllSynonyms(name);
         Assertions.assertEquals(expected, result);
-    }
-
-    private void setupStringSet() {
-        expected.add("set down");
-        expected.add("lay");
-        expected.add("light");
-        expected.add("put");
     }
 }
