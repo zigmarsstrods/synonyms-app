@@ -2,9 +2,11 @@ package io.codelex.synonymsapp.synonyms;
 
 import io.codelex.synonymsapp.synonyms.dto.Word;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -20,7 +22,7 @@ public class SynonymsService {
             Word fullWordInfo = fullWordInfoArray[0];
             return getSynonymsFromWord(fullWordInfo);
         } catch (WebClientResponseException e) {
-            return Set.of("Word not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
